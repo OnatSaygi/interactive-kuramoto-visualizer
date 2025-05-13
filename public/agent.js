@@ -34,7 +34,7 @@ function updateConnections() {
           agent: b,
           distSq: distSq(a.pos, b.pos), // from util.js
         }));
-      neighborsWithDistances.sort((p, q) => abs(p.distSq - q.distSq));
+      neighborsWithDistances.sort((p, q) => p.distSq - q.distSq);
 
       for (let k = 0; k < Math.min(maxCon, neighborsWithDistances.length); k++) {
         const neighborInfo = neighborsWithDistances[k];

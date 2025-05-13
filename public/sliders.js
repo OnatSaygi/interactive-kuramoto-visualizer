@@ -6,7 +6,7 @@ let arcWiggle;
 let movSpeed;
 let natFrq;
 let kCoup;
-let pahseRandom;
+let phaseRandom; // Fix typo
 let duty;
 let currentNumAgents;
 let currentCellRadius;
@@ -17,8 +17,8 @@ let fade;
 
 function setSliders(parts) { // number array
   if (parts.length === SERIAL_PARTS) {
-    let reset_ = parts.pop();
-    for (var [name, id] of sliderSerialBindings) {
+    const reset_ = parts.pop();
+    for (const [name, id] of sliderSerialBindings) {
       setSliderSerial(name, parts[id]);
     }
     if (reset_) initAgents();
@@ -47,8 +47,8 @@ function updateSliders() {
 
 function createSliders() {
   let y = 40;
-  for (let [name, minV, maxV, def, step, pin] of sliderData) {
-    if (!(pin === null)) {
+  for (const [name, minV, maxV, def, step, pin] of sliderData) {
+    if (pin !== null) { // Use strict inequality
       sliderSerialBindings.push([name, pin]);
     }
     if (name == '') {
@@ -87,6 +87,7 @@ function createSliders() {
   }
   updateSliders();
   slidersVisible = !INSTALLATION_MODE;
+  sliderVisibility(slidersVisible);
 }
 
 function getSliderValue(name) {
@@ -95,7 +96,7 @@ function getSliderValue(name) {
 
 // val from 0 to 1023
 function setSliderSerial(name, val) {
-  let slider = sliders[name];
+  const slider = sliders[name];
   val = map(val, 0, 1023, parseFloat(slider.elt.min), parseFloat(slider.elt.max));
   slider.value(val);
   sliderValueDisplays[name].html(slider.value());
@@ -103,7 +104,7 @@ function setSliderSerial(name, val) {
 
 function sliderVisibility(val) {
   slidersVisible = val;
-  for (let name in sliders) {
+  for (const name in sliders) {
     if (slidersVisible) {
       sliders[name].show();
       sliderLabels[name].show();

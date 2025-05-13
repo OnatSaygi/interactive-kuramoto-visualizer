@@ -11,7 +11,7 @@ const sliderData = [
   ["numAgents",         20,    400,      40,       1,   7],
   ["",                   0,      0,       0,       0, null],
   ["arcWiggle",          0,     80,      15,       1, null],
-  ["arcGrowthSpeed",     0,    0.1,     0.4,   0.001, null],
+  ["arcGrowthSpeed",     0,    0.1,    0.04,   0.001, null],
   ["dutyCycle",          0,      1,    0.08,   0.001, null],
   ["kCoupling",          0,   0.01,  0.0092,  0.0001, null],
   ["naturalFrequency",   0,    0.2,    0.08,   0.001, null],

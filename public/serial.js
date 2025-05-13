@@ -7,58 +7,52 @@ let reader;
 let port;
 let connectButton;
 let serialData = "";
-let latestData = "";
 let lastLine = "";
 
+function isKnownPort(portInfo) {
+  return portInfo.usbVendorId === KNOWN_VENDOR_ID && portInfo.usbProductId === KNOWN_PRODUCT_ID;
+}
+
 function connectKnownPorts() {
-  // Tanıdık portlara otomatik bağlan
   navigator.serial.getPorts().then((ports) => {
     for (const p of ports) {
       const info = p.getInfo();
-      if (
-        info.usbVendorId === KNOWN_VENDOR_ID &&
-        info.usbProductId === KNOWN_PRODUCT_ID
-      ) {
-        console.log("Otomatik bağlantı için port bulundu.");
+      if (isKnownPort(info)) {
+        console.log("Found known port for auto-connect.");
         port = p;
         connectToPort();
-        return true;
+        return;
       }
     }
   });
-  return false;
 }
 
 function setupSerialPort(x, y) {
-  connectButton = createButton("Seri Porta Bağlan");
+  connectButton = createButton("Connect Serial Port");
   connectButton.position(x, y);
   connectButton.mousePressed(connectSerial);
 
   connectKnownPorts();
-  // Yeni cihaz takıldığında otomatik bağlan
+
   navigator.serial.addEventListener("connect", (event) => {
     const info = event.target.getInfo();
-    console.log("Yeni cihaz takıldı:", info);
-    if (
-      info.usbVendorId === KNOWN_VENDOR_ID &&
-      info.usbProductId === KNOWN_PRODUCT_ID
-    ) {
+    console.log("New device connected:", info);
+    if (isKnownPort(info)) {
       port = event.target;
       connectToPort();
     }
   });
 
-  // Cihaz çıkarıldığında bağlantıyı temizle
   navigator.serial.addEventListener("disconnect", (event) => {
     const info = event.target.getInfo();
-    console.warn("Cihaz çıkarıldı:", info);
+    console.warn("Device disconnected:", info);
     if (port === event.target) {
       port = null;
       reader = null;
       if (connectButton) {
-        connectButton.html("Seri Porta Bağlan");
+        connectButton.html("Connect Serial Port");
         connectButton.removeAttribute("disabled");
-        connectButton.show(); // Bağlantı koptuğunda butonu göster
+        connectButton.show();
       }
     }
   });
@@ -69,18 +63,15 @@ function connectSerial() {
     .requestPort()
     .then((selectedPort) => {
       const info = selectedPort.getInfo();
-      if (
-        info.usbVendorId === KNOWN_VENDOR_ID &&
-        info.usbProductId === KNOWN_PRODUCT_ID
-      ) {
+      if (isKnownPort(info)) {
         port = selectedPort;
         connectToPort();
       } else {
-        console.warn("Uygun olmayan cihaz seçildi:", info);
+        console.warn("Selected device is not suitable:", info);
       }
     })
     .catch((err) => {
-      console.error("Seri port seçimi iptal edildi:", err);
+      console.error("Serial port selection cancelled:", err);
     });
 }
 
@@ -88,11 +79,10 @@ function connectToPort() {
   if (!port) return;
 
   const info = port.getInfo();
-  console.log(`Bağlanıyor: VID=${info.usbVendorId}, PID=${info.usbProductId}`);
+  console.log(`Connecting: VID=${info.usbVendorId}, PID=${info.usbProductId}`);
 
-  // Buton durumunu "Bağlanıyor" olarak güncelle
   if (connectButton) {
-    connectButton.html("Bağlanıyor");
+    connectButton.html("Connecting...");
     connectButton.attribute("disabled", "");
   }
 
@@ -104,14 +94,17 @@ function connectToPort() {
       reader = decoder.readable.getReader();
       readLoop();
 
-      // Bağlandıktan sonra butonu gizle
       if (connectButton) {
         connectButton.hide();
       }
     })
     .catch((err) => {
-      console.error("Bağlantı hatası:", err);
-      // Hata durumunda yeniden bağlanma logic'i eklenebilir
+      console.error("Connection error:", err);
+      if (connectButton) {
+         connectButton.html("Connect Serial Port");
+         connectButton.removeAttribute("disabled");
+         connectButton.show();
+      }
     });
 }
 
@@ -119,7 +112,10 @@ async function readLoop() {
   try {
     while (true) {
       const { value, done } = await reader.read();
-      if (done) throw new Error("Port bağlantısı kapandı");
+      if (done) {
+         console.warn("Reader closed.");
+         break; // Exit the loop when done
+      }
 
       if (value) {
         serialData += value;
@@ -138,6 +134,12 @@ async function readLoop() {
       }
     }
   } catch (err) {
-    console.warn("readLoop bitti:", err.message);
+    console.error("readLoop error:", err.message);
+    // Re-enable button on error
+    if (connectButton) {
+       connectButton.html("Connect Serial Port");
+       connectButton.removeAttribute("disabled");
+       connectButton.show();
+    }
   }
 }
