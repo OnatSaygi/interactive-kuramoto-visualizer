@@ -3,8 +3,8 @@ const SERIAL_INACTIVITY_TIMEOUT = 10000; // 10 seconds before switching to CSV
 const FALLBACK_PLAYBACK_INTERVAL = 50;  // ms, used if CSV delay is invalid/missing
 const MAX_DELAY = 100;                  // ms, max delay between CSV playback steps
 const PORT = 8080;
-const INPUT_CSV_FILENAME = "veri_kaydi.csv"; // File to read for playback
-const OUTPUT_CSV_FILENAME = "veri_kaydi.csv"; // File to write live data logs
+const INPUT_CSV_FILENAME = "veri_kaydi2.csv"; // File to read for playback
+const OUTPUT_CSV_FILENAME = "veri_kaydi2.csv"; // File to write live data logs
 
 import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
