@@ -100,11 +100,11 @@ class Agent {
     this.vel.add(this.acc);
     this.vel.limit(movSpeed);
     this.pos.add(this.vel);
-    if (this.pos.x <= 0 || this.pos.x >= width) {
+    if (this.pos.x <= 0 || width <= this.pos.x) {
       this.vel.x *= -0.5;
       this.pos.x = constrain(this.pos.x, 0, width);
     }
-    if (this.pos.y <= 0 || this.pos.y >= height) {
+    if (this.pos.y <= 0 || height <= this.pos.y) {
       this.vel.y *= -0.5;
       this.pos.y = constrain(this.pos.y, 0, height);
     }
@@ -114,9 +114,6 @@ class Agent {
     let isFlashing =  (this.phase / TAU) > duty;
     let foo = min(1, map(this.phase / TAU, 0, duty, 0, 1));
     let sca = 1.7 + pow(foo, 1.7) / 2;
-    noStroke();
-    fill(isFlashing ? lerpColor(brightAgentColor, brightAgentColor2, pow(foo, 0.7)) :dimAgentColor);
-    ellipse(this.pos.x, this.pos.y, this.r * sca);
 
     stroke(connectionColor);
     strokeWeight(1.5);
@@ -131,6 +128,22 @@ class Agent {
       let c1 = p5.Vector.lerp(tp, end, 0.3).add(p5.Vector.random2D().mult(wiggle));
       let c2 = p5.Vector.lerp(tp, end, 0.7).add(p5.Vector.random2D().mult(wiggle));
       bezier(tp.x, tp.y, c1.x, c1.y, c2.x, c2.y, end.x, end.y);
+    }
+
+    if (ELLIPSE_MODE) {
+      fill(isFlashing ? lerpColor(brightAgentColor, brightAgentColor2, pow(foo, 0.7)) :dimAgentColor);
+      noStroke();
+      ellipse(this.pos.x, this.pos.y, this.r * sca);
+    } else {
+      noFill();
+      strokeWeight(1.5);
+      stroke(dimAgentColor);
+      push();
+      translate(this.pos.x, this.pos.y);
+      stroke(isFlashing ? lerpColor(brightAgentColor, brightAgentColor2, pow(foo, 0.7)) :dimAgentColor);
+      rotate(this.vel.heading());
+      line(-this.r * sca / 2, 0, this.r * sca / 2, 0);
+      pop();
     }
   }
 

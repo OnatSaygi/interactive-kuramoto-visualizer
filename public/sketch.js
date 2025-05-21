@@ -1,4 +1,5 @@
 const INSTALLATION_MODE = true;
+const ELLIPSE_MODE = true;
 const sliderData = [
   //name,              min,    max,     val,    step,  pin (index in received data from WebSocket)
   ["cellRadius",         3,     40,       5,     0.1,   0],
@@ -29,13 +30,16 @@ let brightAgentColor2;
 let connectionColor;
 
 function windowResized() {
-  // window.location.reload();
-  initAgents();
+  for (agent of agents) {
+    agent.pos.x *= windowWidth / width;
+    agent.pos.y *= windowHeight / height;
+  }
+  resizeCanvas(windowWidth, windowHeight);
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  createSliders(); // From sliders.js - this populates sliderSerialBindings
+  createSliders();
 
   dimAgentColor = color(150, 200, 0, 130);
   brightAgentColor = color(150, 200, 200, 80);
@@ -48,18 +52,18 @@ function setup() {
 }
 
 function draw() {
-  updateSliders(); // Update parameters from (sliders.js)
+  updateSliders();
   adjustPopulation();
   respawnPopulation();
   updateConnections();
-  for (let a of agents) {
-    a.updateOscillator(); // Agent.updateOscillator()
-    a.update();
+  for (let agent of agents) {
+    agent.updateOscillator();
+    agent.update();
   }
-  background(0, 0, 0, fade); // 'fade' is calculated in getSliders()
+  background(0, 0, 0, fade);
   if (slidersVisible) displayAverageFrameRate(10, 30, 60);
-  for (let a of agents) {
-    a.display();
+  for (let agent of agents) {
+    agent.display();
   }
 }
 
