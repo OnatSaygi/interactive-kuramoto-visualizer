@@ -19,15 +19,15 @@ function respawnPopulation() {
 }
 
 function updateConnections() {
-  let spatialGrid = buildSpatialGrid(agents, gridSize); // from spatialgrid.js
-  // Build spatial grid and update agents
-  // (gridSize, maxCon, intRad are updated by getSliders())
+  let spatialGrid = buildSpatialGrid(agents, gridSize);
+
   for (let a of agents) {
-    const potentialNeighbors = getNeighbors(a, spatialGrid, gridSize); // from spatialgrid.js
-    a.applyForces(potentialNeighbors); // Agent.applyForces()
-    // Reset connections if connection count is changed
-    if (a.connections.length !== maxCon) {
-      a.connections = [];
+    const potentialNeighbors = getNeighbors(a, spatialGrid, gridSize);
+    a.applyForces(potentialNeighbors);
+    const conLength = a.connections.length;
+    const conTarget = a.connectionCount();
+    const delta = conTarget - conLength;
+    if (delta > 0) {
       const neighborsWithDistances = potentialNeighbors
         .filter((b) => b !== a && distSq(a.pos, b.pos) < intRad * intRad) // Filter by interactionRadius
         .map((b) => ({
@@ -36,21 +36,22 @@ function updateConnections() {
         }));
       neighborsWithDistances.sort((p, q) => p.distSq - q.distSq);
 
-      for (let k = 0; k < Math.min(maxCon, neighborsWithDistances.length); k++) {
+      for (let k = 0; k < Math.min(a.connectionCount(), neighborsWithDistances.length); k++) {
         const neighborInfo = neighborsWithDistances[k];
         a.connect(neighborInfo.agent); // Agent.connect()
       }
+    }
+    if (delta < 0) {
+      a.connections.pop(max(0, -delta));
     }
   }
 }
 
 function initAgents() {
   agents = [];
-  let num = int(getSliderValue("numAgents"));
-  let cellRadiusValue = getSliderValue("cellRadius");
-  for (let i = 0; i < num; i++) {
+  for (let i = 0; i < currentNumAgents; i++) {
     agents.push(
-      new Agent(random(width), random(height), cellRadiusValue),
+      new Agent(random(width), random(height), currentCellRadius),
     );
   }
 }
@@ -58,12 +59,16 @@ function initAgents() {
 class Agent {
   constructor(x, y, r) {
     this.pos = createVector(x, y);
-    this.r = r;
     this.vel = p5.Vector.random2D().mult(movSpeed);
     this.acc = createVector(0, 0);
     this.connections = [];
     this.growthProgress = new Map();
     this.phase = random(TAU);
+    this.connectionOffset = random(1);
+  }
+
+  connectionCount() {
+    return floor(1 + maxCon - this.connectionOffset);
   }
 
   applyForces(others) {

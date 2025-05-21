@@ -1,19 +1,19 @@
-let intRad;
-let forceStr;
-let arcSpeed;
-let cellRad;
-let arcWiggle;
-let movSpeed;
-let natFrq;
-let kCoup;
-let phaseRandom; // Fix typo
-let duty;
-let currentNumAgents;
-let currentCellRadius;
-let respawnSpeed;
-let gridSize;
-let maxCon;
-let fade;
+let intRad = 500;
+let forceStr = 0.001;
+let arcSpeed = 0.1;
+let cellRad = 10;
+let arcWiggle = 15;
+let movSpeed = 0.1;
+let natFrq = 0.2;
+let kCoup = 0.5;
+let phaseRandom = 0.04;
+let duty = 0.07;
+let currentNumAgents = 200;
+let currentCellRadius = 10;
+let respawnSpeed = 0.05;
+let gridSize = 10;
+let maxCon = 5;
+let fade = 127;
 
 function setSliders(parts) { // number array
   if (parts.length === SERIAL_PARTS) {
